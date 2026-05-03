@@ -17,6 +17,6 @@ class VideoJob(Base):
     user_id = Column(String, index=True)
     original_name = Column(String)
     status = Column(Enum(JobStatus), default=JobStatus.queued)
-    tool_used = Column(String) # Corte, Legenda, Compressao, Conversao, Audio, Enhancer
+    tool_used = Column(String)
     output_url = Column(String, nullable=True)
-    progress = Column(Integer, default=0) # New: Progress percentage of the job
+    progress = Column(Integer, default=0)

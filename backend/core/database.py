@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import os
 
 # Database URL from environment variable
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@db/smartvex")
+SQLALCHEMY_DATABASE_URL = os.getenv("SUPABASE_DB_URL", "postgresql://postgres:Tokisakibr1$@db.nvdnuwtnewnkoknmhkif.supabase.co:5432/postgres")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
