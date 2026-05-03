@@ -7,3 +7,5 @@ redis
 supabase
 python-multipart
 requests
+openai
+httpx
