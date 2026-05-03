@@ -35,28 +35,38 @@ class VideoProcessor:
             "-c:a", "copy", output_path
         ]
 
-        process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True
-        )
+        try:
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE, # Capturar erros detalhados
+                universal_newlines=True
+            )
 
-        # Regex precisa para HH:MM:SS.ms
-        time_regex = re.compile(r"time=(\d{2}):(\d{2}):(\d{2})\.(\d{2})")
+            # Regex precisa para HH:MM:SS.ms
+            time_regex = re.compile(r"time=(\d{2}):(\d{2}):(\d{2})\.(\d{2})")
 
-        for line in process.stdout:
-            match = time_regex.search(line)
-            if match and progress_callback and self.duration > 0:
-                h, m, s, ms = map(int, match.groups())
-                current_time = h * 3600 + m * 60 + s + (ms / 100)
-                progress = min(int((current_time / self.duration) * 100), 100)
-                progress_callback(progress)
+            # Processar stdout e stderr para progresso e erros
+            while True:
+                line = process.stderr.readline()
+                if not line and process.poll() is not None:
+                    break
+                
+                if line:
+                    match = time_regex.search(line)
+                    if match and progress_callback and self.duration > 0:
+                        h, m, s, ms = map(int, match.groups())
+                        current_time = h * 3600 + m * 60 + s + (ms / 100)
+                        progress = min(int((current_time / self.duration) * 100), 100)
+                        progress_callback(progress)
 
-        process.wait()
-        if process.returncode != 0:
-            logger.error(f"FFmpeg falhou com código {process.returncode}")
-            raise Exception("Erro no processamento de vídeo")
+            process.wait()
+            if process.returncode != 0:
+                raise Exception(f"FFmpeg falhou com código {process.returncode}")
+        
+        except Exception as e:
+            logger.error(f"Erro industrial no processamento: {e}")
+            raise Exception(f"VideoProcessingFailed: {str(e)}")
 
     def detect_silence(self, threshold="-30dB", duration=1.0):
         cmd = [
