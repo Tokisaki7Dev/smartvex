@@ -1,0 +1,40 @@
+# Node.js
+node_modules/
+.next/
+out/
+.env.local
+.env
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.log
+.venv/
+env/
+venv/
+.pytest_cache/
+.mypy_cache/
+.vscode/
+
+# Docker
+*.env # To prevent accidentally committing .env files inside docker directories
+!docker-compose.yml # Keep docker-compose.yml
+!backend.Dockerfile
+!frontend.Dockerfile
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Uploaded Files
+backend/uploads/
+
+# Compiled FFmpeg outputs (if they are not meant to be version controlled)
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Temporary files
+*.tmp
