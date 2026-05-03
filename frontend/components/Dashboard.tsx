@@ -1,7 +1,8 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Zap, FileVideo, Command, Settings, Play, Clock, ChevronRight, Activity } from 'lucide-react';
 import { getSupabase } from '../services/supabaseClient';
+import AnalyticsDashboard from './AnalyticsDashboard';
 
 const tools = [
   { name: 'Enhancer', icon: Zap, desc: 'Otimização de vídeo com IA' },
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('Enhancer');
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function loadJobs() {
@@ -26,8 +28,6 @@ export default function Dashboard() {
     }
     loadJobs();
   }, []);
-
-  // ... restante do código permanece o mesmo, chamando a função de upload quando necessário ...
 
   async function handleFile(file: File) {
     if (!file) return;
@@ -44,7 +44,11 @@ export default function Dashboard() {
       });
       if (response.ok) {
         alert('Upload realizado com sucesso!');
-        fetchJobs();
+        const supabase = getSupabase();
+        if (supabase) {
+          const { data } = await supabase.from('video_jobs').select('*').order('created_at', { ascending: false });
+          if (data) setJobs(data);
+        }
       }
     } catch (err) {
       alert('Erro ao realizar upload.');
@@ -114,6 +118,7 @@ export default function Dashboard() {
               ))}
             </div>
           </section>
+          <AnalyticsDashboard />
         </section>
       </main>
     </div>
