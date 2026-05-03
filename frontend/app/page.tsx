@@ -1,10 +1,5 @@
-'use client';
-import React from 'react';
+import Dashboard from '@/components/Dashboard';
 
 export default function Page() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-black text-white">
-      <h1 className="text-4xl font-bold">Bem-vindo ao SmartVex</h1>
-    </div>
-  );
+  return <Dashboard />;
 }

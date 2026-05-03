@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp?project_ref=nvdnuwtnewnkoknmhkif&read_only=true&features=functions,development,account,debugging,branching,database,docs",
+      "type": "http"
+    }
+  }
+}
