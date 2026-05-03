@@ -1,18 +1,17 @@
 from backend.workers.celery_app import celery_app
-from backend.utils.ffmpeg.enhancer import enhance_video
+from backend.utils.ffmpeg.enhancer import VideoProcessor
 from backend.models.video import VideoJob, JobStatus
 from backend.core.database import SessionLocal
 import requests
 import os
 
 @celery_app.task(bind=True)
-def process_video_task(self, job_id: int, input_url: str, output_filename: str):
+def process_video_task(self, job_id: int, input_url: str, tool_used: str):
     db = SessionLocal()
     local_input = f"/tmp/{job_id}_input"
     local_output = f"/tmp/{job_id}_output"
     
     try:
-        # Download do Supabase
         r = requests.get(input_url)
         with open(local_input, 'wb') as f:
             f.write(r.content)
@@ -21,17 +20,19 @@ def process_video_task(self, job_id: int, input_url: str, output_filename: str):
         job.status = JobStatus.processing
         db.commit()
 
-        def progress_cb(p):
-            job.progress = p
-            db.commit()
-            self.update_state(state='PROGRESS', meta={'progress': p})
+        processor = VideoProcessor(local_input)
 
-        enhance_video(local_input, local_output, progress_cb)
-        
-        # Opcional: Upload do resultado de volta para o Supabase Storage aqui
+        if tool_used == 'Corte':
+            # Implementação de corte baseada em silêncio
+            processor.detect_silence() 
+            processor.convert_format(local_output)
+        elif tool_used == 'Conversão':
+            processor.convert_format(local_output)
+        else:
+            # Default Enhancer
+            processor.run_ffmpeg("unsharp=5:5:1.0:5:5:0.0", local_output)
         
         job.status = JobStatus.completed
-        job.output_url = "PROCESSAMENTO_CONCLUIDO" 
         db.commit()
     except Exception as e:
         job.status = JobStatus.failed
