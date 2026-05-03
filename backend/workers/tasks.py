@@ -1,5 +1,6 @@
 from backend.workers.celery_app import celery_app
 from backend.utils.ffmpeg.enhancer import VideoProcessor
+from backend.utils.ai.ai_processor import AIProcessor
 from backend.models.video import VideoJob, JobStatus
 from backend.core.database import SessionLocal
 import requests
@@ -12,6 +13,7 @@ def process_video_task(self, job_id: int, input_url: str, tool_used: str):
     local_output = f"/tmp/{job_id}_output"
     
     try:
+        # Download
         r = requests.get(input_url)
         with open(local_input, 'wb') as f:
             f.write(r.content)
@@ -20,16 +22,19 @@ def process_video_task(self, job_id: int, input_url: str, tool_used: str):
         job.status = JobStatus.processing
         db.commit()
 
-        processor = VideoProcessor(local_input)
-
-        if tool_used == 'Corte':
-            # Implementação de corte baseada em silêncio
+        # Orquestração industrial
+        if tool_used == 'Legenda':
+            ai = AIProcessor()
+            srt_content = ai.transcribe(local_input)
+            # Salvar SRT ou aplicar no vídeo...
+            job.output_url = "LEGENDAS_PROCESSADAS"
+        
+        elif tool_used == 'Corte':
+            processor = VideoProcessor(local_input)
             processor.detect_silence() 
             processor.convert_format(local_output)
-        elif tool_used == 'Conversão':
-            processor.convert_format(local_output)
         else:
-            # Default Enhancer
+            processor = VideoProcessor(local_input)
             processor.run_ffmpeg("unsharp=5:5:1.0:5:5:0.0", local_output)
         
         job.status = JobStatus.completed
