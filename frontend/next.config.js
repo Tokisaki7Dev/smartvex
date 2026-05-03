@@ -1,12 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Desativa a pré-renderização estática para evitar erros de variáveis de ambiente no build
   output: 'standalone',
-  eslint: {
-    ignoreDuringBuilds: true,
+  reactStrictMode: true,
+  swcMinify: true,
+  images: {
+    domains: ['nvdnuwtnewnkoknmhkif.supabase.co'],
   },
-  typescript: {
-    ignoreBuildErrors: true,
+  webpack: (config) => {
+    config.resolve.alias['@'] = __dirname;
+    return config;
   },
 };
 
