@@ -6,3 +6,4 @@ celery
 redis
 supabase
 python-multipart
+requests
